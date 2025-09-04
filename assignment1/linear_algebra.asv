@@ -1,0 +1,113 @@
+%
+% linear_algebra.m
+%    Copy the content to the end of the submission
+%
+
+script = 1;
+
+equ = @(x, y) max(max(abs(x - y))) < 1e-10;
+
+
+%
+% P1. [3 pt] Implement roots function
+% roots(x, n)
+%   x: a complex number
+%   n: an integer
+%   returns an array of all nth-roots of x
+%
+function ret = roots(x, n)
+    if x == 0
+        ret = zeros(1, n);
+        return;
+    end
+
+    r   = abs(x);         % 크기 |x|
+    th  = angle(x);       % 각도 arg(x)
+    rho = r^(1/n);        % 크기의 n제곱근
+    ret = zeros(1, n);    % 결과 벡터(1×n) 미리 만들기
+
+    for k = 0:n-1
+        ret(k+1) = rho * exp(1i*(th + 2*pi*k)/n);
+    end
+end
+
+
+%
+% test
+%
+i = sqrt(-1);
+x = 1 + i;
+a = roots(x, 3);
+assert( length(a) == 3 );
+assert( ~equ(a{1}, a{2}) );
+assert( ~equ(a{1}, a{3}) );
+assert( ~equ(a{2}, a{3}) );
+assert( equ(a{1}^3, x) );
+assert( equ(a{2}^3, x) );
+assert( equ(a{3}^3, x) );
+fprintf('Success!\n');
+
+%
+% P2. [2 pt] Implement iprod function
+% iprod(u, v) 
+%    u, v: column vectors
+%    returns the inner product <u, v>
+%
+function ret = iprod(u, v)
+end    
+
+%
+% test
+%
+u = [1+i; 1-i];
+v = [2+i; 3+i];
+assert( equ(iprod(u, v), 5-3i) )
+assert( equ(iprod(u, u), 4) )
+assert( equ(iprod(v, v), 15) )
+fprintf('Success!\n');
+
+%
+% P3. [3 pt] Implement gram_schmidt function
+% gram_schmidt(bv) 
+%    bv: an array of basis
+%    returns an array of orthonormal basis bw
+%       such that span(bv) = span(bw)
+%
+function ret = gram_schmidt(bv)
+end
+
+%
+% test
+%
+i = sqrt(-1);
+bw = gram_schmidt({[1 + i; 0], [1; 1]});
+assert( length(bw) == 2 );
+assert( length(bw{1}) == 2 );
+assert( length(bw{2}) == 2 );
+assert( equ(iprod(bw{1}, bw{1}), 1) );
+assert( equ(iprod(bw{2}, bw{2}), 1) );
+assert( equ(iprod(bw{2}, bw{1}), 0) );
+fprintf('Success!\n');
+
+
+%
+% P4. [2 pt] Find a, b, and c such that
+%        x = a*bw{1} + b*bw{2} + c*bw{3}
+%   - In other words, express x as a linear combination of
+%        bw{1}, bw{2}, and bw{3}
+%   - Do not write the numbers directly, but write
+%        an expression to compute them
+%
+i = sqrt(-1);
+bw = gram_schmidt({[1 + i; 0; 1], [1; 1; 0], [0; 1; i]});
+x = [2 + 3i; 4 + 5i; 1 + 2i];
+a = 
+b = 
+c = 
+
+%
+% test
+%
+y = a * bw{1} + b * bw{2} + c * bw{3};
+assert( equ(y, x) );
+fprintf('Success!\n');
