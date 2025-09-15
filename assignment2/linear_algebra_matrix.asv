@@ -10,11 +10,12 @@ a = [1, 1; 1, -1] / sqrt(2);
 b = diag([exp(i*2*pi/20), exp(i*2*pi/30)]);
 m = a * b * a';
 clear a b
-e = exp(1);
 I = [1,  0; 0,  1] / sqrt(2);
 X = [0,  1; 1,  0] / sqrt(2);
 Y = [0, -i; i,  0] / sqrt(2);
 Z = [1,  0; 0, -1] / sqrt(2);
+
+iprod = @(u, v) trace(u * v');
 
 %
 % P1. [3pt] Implement mat_pow function using diagonalization
@@ -27,6 +28,8 @@ Z = [1,  0; 0, -1] / sqrt(2);
 %
 function ret = mat_pow(m, exponent)
     [q, p] = eig(m);
+    p_pow = diag(diag(p).^exponent);
+    ret = q * p_pow * inv(q);
 
 end
 
@@ -50,13 +53,15 @@ fprintf('Success!\n');
 %
 function ret = mat_exp(m)
     [q, p] = eig(m);
+    p_exp = diag(exp(1).^(diag(p)));
+    ret = q * p_exp * inv(q);
 
 end
 
 %
 % test
 %
-e^m;
+exp(1)^m;
 me = mat_exp(m);
 assert(max(max(abs(me - e^m))) < 1e-10)
 fprintf('Success!\n');
@@ -73,7 +78,11 @@ fprintf('Success!\n');
 %      such that v = coef(1)*basis{1} + ... + coef(n)*basis{n}
 %
 function ret = decompose(v, basis)
-
+    n = length(basis);
+    ret = zeros(1, n);
+    for i = 1:n
+        ret(i) = iprod(v, basis{i});
+    end
 end
 
 %
@@ -96,7 +105,11 @@ fprintf('Success!\n');
 %      coef(1)*basis{1} + ... + coef(n)*basis{n}
 %
 function ret = compose(coefs, basis)
-
+    n = length(basis);
+    ret = 0;
+    for i = 1:n
+        ret = ret + coefs(i) * basis{i};
+    end
 end
 
 %
