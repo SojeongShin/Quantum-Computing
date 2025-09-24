@@ -67,11 +67,11 @@ function ret = make_quantum_circuit(nr_wire)
                 %   - SWAP is wired at wire s and s+1. 
                 swp = 1;
                 for i = 0:(s-1)
-                    swp = kron(swp, I);
+                    swp = kron(I, swp);
                 end
-                swp = kron(swp, SWAP);
+                swp = kron(SWAP, swp);
                 for i = (s+2):(nr_wire-1)
-                    swp = kron(swp, I);
+                    swp = kron(I, swp);
                 end
                 % apply swp to opr
                 opr = swp * opr;
@@ -139,7 +139,8 @@ function ret = make_quantum_circuit(nr_wire)
             % qi2wi(qi_src(i)+1): the wire the source qubit is now
             if i-1 ~= qi2wi(qi_src(i)+1)  
                 % move the i-th qubit to wire i-1     
-                tacked_opr = swap__(i-1, qi2wi(qi_src(i)+1)) * tacked_opr;
+                tacked_opr = swap__(qi2wi(qi_src(i)+1), i-1) * tacked_opr;
+
 
                 % update qi2wi map
                 qi = find(qi2wi==(i-1)) - 1;        % occupant of wire i-1
@@ -150,14 +151,14 @@ function ret = make_quantum_circuit(nr_wire)
 
         % TODO: apply opr to qubits at [0..nr_pin-1]
         %   i.e., qc_opr =  (opr @ I @..@ I) * qc_opr
-        tacked_opr = (kron(opr, eye(2^(nr_wire-nr_pin)))) * tacked_opr;
+        tacked_opr = kron(opr, eye(2^(nr_wire - nr_pin))) * tacked_opr;
 
         % TODO: mvoe the relocated qubits to their original wires
         for i = 1:nr_wire
             if i-1 ~= qi2wi(i)          % if qubit i is not at wire i-1
                 % move the qubit i to wire i-1
-                tacked_opr = swap__(i-1, qi2wi(i)) * tacked_opr;
-
+                tacked_opr = swap__(qi2wi(i), i-1) * tacked_opr;
+                
                 % update qi2wi map
                 qi = find(qi2wi==(i-1)) - 1;    % occupant of wire i-1
                 qi2wi(qi+1) = qi2wi(i);         % qi is moved to where i-th qubit was
@@ -172,8 +173,8 @@ function ret = make_quantum_circuit(nr_wire)
     %   - [0..nr_pin-1] pins of opr are wired to the wires at wi_indexes
     % 
    function ret = wire(opr, wi_indexes)
-        opr = tack_pin__(opr, wi_indexes);    % tack pins of opr to wi_indexes
-        qc_opr = opr * qc_opr; % wire opr to qc (update qc_opr)
+        opr = __________    % tack pins of opr to wi_indexes
+        qc_opr = __________ % wire opr to qc (update qc_opr)
         ret = qc_opr;
     end
 
@@ -185,19 +186,18 @@ function ret = make_quantum_circuit(nr_wire)
     function ret = measure(wi_indexes)
         global bra
         nr_pin = length(wi_indexes);
-        reg  = get_reg();               % current quantum state
+        reg  = __________               % current quantum state
         prnd = rand();                  % sample if psum >= prnd
         psum = 0;                       % check when psum >= prnd
         for ket_nr = 0:(2^nr_pin - 1)
             ket = ket_with_size__(ket_nr, nr_pin);
-            prj = ket * ket';            % prj = |ket_nr><ket_nr|
-            prj = tack_pin__(prj, wi_indexes);            % tack pins of prj to wi_indexes
-            p = real(bra(reg) * prj * reg);              % p = P[ measure ket_nr ]               
+            prj = __________            % prj = |ket_nr><ket_nr|
+            prj = __________            % tack pins of prj to wi_indexes
+            p = __________              % p = P[ measure ket_nr ]               
             psum = psum + p;            % accumulate p to psum
             if psum >= prnd             % sample
-                ret = ket_nr;        % measured value
-                reg_collapsed = prj * reg;
-                qc_opr = (reg_collapsed / norm(reg_collapsed)) * bra(ket__(0));     % collapse state
+                ret = __________        % measured value
+                qc_opr = __________     % collapse state
                 return;
             end
         end
