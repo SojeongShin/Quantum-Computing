@@ -9,7 +9,7 @@ quantum_circuit = @(nr_wire) make_quantum_circuit(nr_wire);
 
 % import qc_defs
 qc_defs;
-
+global k0 k1
 % make_quantum_circuit(nr_wire)
 %   - construct a quantum circuit of nr_wire wires (qubits)
 %       it returns a dictionary of its member functions
