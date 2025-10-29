@@ -109,3 +109,8 @@ function ret = multi_controlled__(opr, str_ctrl)
     end
     ret = recur(1);
 end
+
+global RX RY RZ
+RX = @(theta) expm(-1i * theta/2 * X);
+RY = @(theta) expm(-1i * theta/2 * Y);
+RZ = @(theta) expm(-1i * theta/2 * Z);
