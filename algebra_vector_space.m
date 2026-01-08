@@ -1,0 +1,111 @@
+%
+% algebra_vector_space.m
+%
+script = 1;
+
+% export vector_space functions
+global vector_space_function;
+vector_space_function = dictionary(...
+    ["make_vector_space", "test_vector_space"],...
+    {@make_vector_space,  @test_vector_space});
+
+% import group
+algebra_group;
+
+function ret = make_vector_space(member, add, add_id, add_inv, s_mul)
+    % Note: we are restricting the Field to R or C
+    ret = dictionary(...
+        ["member", "add", "add_id", "add_inv", "s_mul"],...
+        { member,   add,   add_id,   add_inv,   s_mul}); 
+end
+
+function [] = test_vector_space(vector_space, x, y, z, s, t, equ)
+    % group
+    member     = vector_space{"member"};
+    add        = vector_space{"add"};
+    add_id     = vector_space{"add_id"};
+    add_inv    = vector_space{"add_inv"};
+    % scalar multiplication
+    s_mul      = vector_space{"s_mul"};
+
+    global group_function;
+    make_group         = group_function{"make_group"};
+    test_abelian_group = group_function{"test_abelian_group"};
+
+    %
+    % TODO: fill the blanks
+    %
+
+    % test abelian group properties of add
+    % hint: make_group(member, opr, identity, inverse)  
+    grp_add = make_group(memeber, add, add_id, add_inv);
+    test_abelian_group(grp_add, x, y, z, equ);
+
+    % scalar multiplication
+    %
+    % distributivity 1: s*(x + y) = s*x + s*y
+    a = s_mul(s, add(x, y));
+    b = add(s_mul(s, x), s_mul(s, y));
+    assert(equ(a, b));
+
+    % distributivity 2: (s + t)*x = s*x + t*x
+    a = s_mul(s + t, x);
+    b = add(s_mul(s, x), s_mul(t, x));
+    assert(equ(a, b));
+
+    % compatibility with multiplication: (s*t)*x = s*(t*x)
+    a = s_mul(s .* t, x);
+    b = s_mul(s, s_mul(t, x));
+    assert(equ(a, b));
+
+    % identity: 1*x = x
+    a = smul(1, x);
+    assert(equ(a, x));
+end
+
+% vector 2d
+%    
+vs_vec2 = make_vector_space(...
+    @(x) isequal(size(x), [2,1]),... % member
+    @(x, y) x + y,...                % add
+    [0; 0],...                       % add_id
+    @(x) -x,...                      % add_inv
+    @(s, x) s .* x);                 % s_mul
+test_vector_space(...
+    vs_vec2,...                       % vector space
+    [1; 1], [2; 2], [3; 3],...        % x, y, z
+    2, 3,...                          % s, t
+    @(x, y) max(abs(x - y)) < 1e-10); % equ
+
+
+%
+% TODO: fill the blanks
+%
+
+% 2x2 matrix
+%
+vs_mat2x2 = make_vector_space(...
+    @(x) isequal(size(x), [2,2]),... % member
+    @(f, g) @(x) f(x) + g(x),...                   % add
+    __________,...                   % add_id
+    __________,...                   % add_inv
+    __________);                     % s_mul
+test_vector_space(...
+    vs_mat2x2,...                                  % vector space
+    [0, 1; 1, 0], [0, -i; i, 0], [1, 0; 0, -1],... % x, y, z
+    2, 3,...                                       % s, t
+    @(x, y) max(max(abs(x - y))) < 1e-10);         % equ
+
+% function: (f+g)(x) = f(x)+g(x), (a*f)(x) = a*f(x)
+%
+vs_fun = make_vector_space(...
+    @(f) isa(f, 'function_handle'),...  % member
+    __________,...                      % add
+    __________,...                      % add_id
+    __________,...                      % add_inv
+    __________);                        % s_mul
+test_vector_space(...
+    vs_fun,...                          % vector space
+    @sin, @cos, @(x) x.^2,...           % x, y, z
+    2, 3,...                            % s, t
+    @(f, g) max(abs(f(-1:0.1:1) - g(-1:0.1:1))) < 1e-10); % equ
